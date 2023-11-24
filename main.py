@@ -28,6 +28,12 @@ tickets = [
     }
 ]
 
+# Neues Dictionary für die Transaktionsinformation (gewähltes Ticket und ausstehender Betrag)
+transaction = {
+    'received_coins': [],
+    'remaining_amount': 0.0
+}
+
 
 # # # UI Elements
 # Ticket Layout Elemente
@@ -36,8 +42,8 @@ def add_ticket_options(p_layout):
     # Überschrift für Ticketwahl
     ticket_choice_label = QLabel("Bitte wählen Sie ihr Ticket:")
     font = QFont()
-    font.setPointSize(16)
     font.setBold(True)
+    font.setPointSize(16)
     ticket_choice_label.setFont(font)
     p_layout.addWidget(ticket_choice_label)
 
@@ -47,6 +53,8 @@ def add_ticket_options(p_layout):
         ticket_option = QPushButton(f"{ticket.get('name')} - CHF {ticket.get('price'):.2f}")
         ticket_option.setFixedHeight(50)
         ticket_option.setFont(font)
+        # Hinzufügen, dass die Funktion "choose_ticket" aufgerufen, wenn auf den Button geklickt wird
+        ticket_option.clicked.connect(lambda _, ticket_id=ticket.get('id'): choose_ticket(ticket_id))
         p_layout.addWidget(ticket_option)
         ticket_options.append(ticket_option)
 
@@ -74,6 +82,7 @@ def add_ticket_choice(p_layout):
 def add_ticket_output(p_layout):
     ticket_output_label = QLabel("Ticketausgabe:")
     font = QFont()
+    font.setBold(True)
     font.setPointSize(16)
     ticket_output_label.setFont(font)
     p_layout.addWidget(ticket_output_label)
@@ -107,14 +116,17 @@ def add_coin_buttons(p_layout):
         coin_buttons.append(coin_button)
         p_layout.addWidget(coin_button)
 
+    # Dieses Label wurde für eine Korrektur der Abstände im Layout hinzugefügt
+    p_layout.addWidget(QLabel())
+
 
 # Element für die Ausgabe des Rückgelds hinzufügen
 def add_change_output(p_layout):
     # Überschrift für die Ausgabe des Rückgelds
     change_output_label = QLabel("Ihr Rückgeld:")
     font = QFont()
-    font.setPointSize(16)
     font.setBold(True)
+    font.setPointSize(16)
     change_output_label.setFont(font)
     p_layout.addWidget(change_output_label)
 
@@ -146,6 +158,30 @@ def get_divider():
     divider.setFrameShadow(QFrame.Sunken)
     divider.setLineWidth(2)
     return divider
+
+
+# # # Funktionen
+# Mit einer Ticket ID aus der Ticketliste ein Ticket auswählen und zurückgeben
+def get_ticket_by_id(ticket_id):
+    for ticket in tickets:
+        if ticket.get('id') == ticket_id:
+            return ticket
+
+
+# Die Ticketauswahl speichern
+def choose_ticket(ticket_id):
+    # Ticket anhand der ID ermitteln
+    ticket = get_ticket_by_id(ticket_id)
+
+    # Ticketwahl ausgeben
+    ticket_choice.setPlainText(
+        f"Ihre Ticket Auswahl:\
+		\n\r-- {ticket.get('name').upper()} --\
+		\n\rBitte werfen Sie CHF {ticket.get('price'):.2f} ein.")
+
+    # In der Transaktion das ticket hinterlegen und den erwarteten Betrag
+    transaction['requested_ticket'] = ticket
+    transaction['remaining_amount'] = ticket.get('price')
 
 
 def show_ui():
@@ -203,28 +239,27 @@ def show_ui():
     window.show()
 
 
-if __name__ == "__main__":
-    # Applikation vorbereiten
-    app = QApplication(sys.argv)
+# Wir haben das if statement zu main entfernt, es hatte keine Auswirkungen
+# Applikation vorbereiten
+app = QApplication(sys.argv)
 
-    # Alle global verfügbaren UI Element vorbereiten
-    # Diese UI Elemente werden von mehreren Funktionen benötigt, deswegen haben wir sie global definiert
-    window = QWidget()
-    # Liste für die Buttons der Auswahlmöglichkeiten zu den Tickets
-    ticket_options = []
-    # Anzeige des gewählten Tickets
-    ticket_choice = QTextEdit()
-    # Stornieren Button
-    cancel_button = QPushButton()
-    # Ausgabe des Tickets
-    ticket_output = QTextEdit()
-    # Liste für die Buttons der Auswahlmöglichkeiten zu den Münzen
-    coin_buttons = []
-    # Ausgabe des Rückgelds
-    change_output = QTextEdit()
+# Alle global verfügbaren UI Element vorbereiten
+# Diese UI Elemente werden von mehreren Funktionen benötigt, deswegen haben wir sie global definiert
+window = QWidget()
+# Liste für die Buttons der Auswahlmöglichkeiten zu den Tickets
+ticket_options = []
+# Anzeige des gewählten Tickets
+ticket_choice = QTextEdit()
+# Stornieren Button
+cancel_button = QPushButton()
+# Ausgabe des Tickets
+ticket_output = QTextEdit()
+# Liste für die Buttons der Auswahlmöglichkeiten zu den Münzen
+coin_buttons = []
+# Ausgabe des Rückgelds
+change_output = QTextEdit()
 
-    # Nach der Definition soll das UI angezeigt werden
-    show_ui()
-    # Das Programm wird beendet, wenn die QApplication ausläuft
-    sys.exit(app.exec_())
-
+# Nach der Definition soll das UI angezeigt werden
+show_ui()
+# Das Programm wird beendet, wenn die QApplication ausläuft
+sys.exit(app.exec_())
