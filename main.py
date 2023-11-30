@@ -41,9 +41,8 @@ transaction = {
 def add_ticket_options(p_layout):
     # Überschrift für Ticketwahl
     ticket_choice_label = QLabel("Bitte wählen Sie ihr Ticket:")
-    font = QFont()
-    font.setBold(True)
-    font.setPointSize(16)
+    # Font Definition durch die neue get_font Funktion ersetzen
+    font = get_font(16, True)
     ticket_choice_label.setFont(font)
     p_layout.addWidget(ticket_choice_label)
 
@@ -63,13 +62,16 @@ def add_ticket_options(p_layout):
     font.setBold(True)
     cancel_button.setFixedHeight(50)
     cancel_button.setFont(font)
+    # Funktion zum Stornieren mit dem Stornieren-Button verbinden
+    cancel_button.clicked.connect(cancel_ticket_choice)
     p_layout.addWidget(cancel_button)
 
 
 # Element für die Ticketauswahl Anzeige
 def add_ticket_choice(p_layout):
     ticket_choice.setReadOnly(True)
-    font = QFont("Courier New", 16)
+    # Font Definition durch die neue get_font Funktion ersetzen
+    font = get_font(16, False, 'Courier New')
     ticket_choice.setFont(font)
     ticket_choice.setFixedSize(300, 110)
     ticket_choice.setPlainText('Keine Auswahl getroffen')
@@ -78,16 +80,23 @@ def add_ticket_choice(p_layout):
     p_layout.addWidget(ticket_choice)
 
 
+# Element für für die Anzeige des Restbetrags hinzufügen
+def add_remaining_amount(p_layout):
+    font = get_font(14, True)
+    font.setFamily("Courier New")
+    remaining_amount_output.setFont(font)
+    p_layout.addWidget(remaining_amount_output)
+
+
 # Element für die Ticketausgabe hinzufügen
 def add_ticket_output(p_layout):
     ticket_output_label = QLabel("Ticketausgabe:")
-    font = QFont()
-    font.setBold(True)
-    font.setPointSize(16)
+    font = get_font(16, True)
     ticket_output_label.setFont(font)
     p_layout.addWidget(ticket_output_label)
 
     ticket_output.setReadOnly(True)
+    # Font Definition durch die neue get_font Funktion ersetzen
     font = QFont("Courier New", 16)
     ticket_output.setFont(font)
     ticket_output.setFixedSize(300, 200)
@@ -100,9 +109,8 @@ def add_ticket_output(p_layout):
 def add_coin_buttons(p_layout):
     # Überschrift für Münzwahl
     coin_buttons_label = QLabel("Nutzen Sie die Buttons um Geld einzuwerfen:")
-    font = QFont()
-    font.setBold(True)
-    font.setPointSize(16)
+    # Font Definition durch die neue get_font Funktion ersetzen
+    font = get_font(16, True)
     coin_buttons_label.setFont(font)
     coin_buttons_label.setAlignment(Qt.AlignBottom)
     p_layout.addWidget(coin_buttons_label)
@@ -113,6 +121,8 @@ def add_coin_buttons(p_layout):
         coin_button = QPushButton(f"CHF {coin:.2f}")
         coin_button.setFixedHeight(50)
         coin_button.setFont(font)
+        # Funktion zum Münzeinwurf mit den jeweiligen Münz-Button verbinden
+        coin_button.clicked.connect(lambda _, value=coin: receive_coin(value))
         coin_buttons.append(coin_button)
         p_layout.addWidget(coin_button)
 
@@ -124,15 +134,15 @@ def add_coin_buttons(p_layout):
 def add_change_output(p_layout):
     # Überschrift für die Ausgabe des Rückgelds
     change_output_label = QLabel("Ihr Rückgeld:")
-    font = QFont()
-    font.setBold(True)
-    font.setPointSize(16)
+    # Font Definition durch die neue get_font Funktion ersetzen
+    font = get_font(16, True)
     change_output_label.setFont(font)
     p_layout.addWidget(change_output_label)
 
     # Konfiguration des Textfelds für das Rückgeld
     change_output.setReadOnly(True)
-    font = QFont("Courier New", 16)
+    # Font Definition durch die neue get_font Funktion ersetzen
+    font = get_font(16, False, 'Courier New')
     change_output.setFont(font)
     change_output.setFixedSize(300, 200)
     p_layout.addWidget(change_output)
@@ -143,15 +153,25 @@ def add_close_button(p_layout):
     close_button = QPushButton('Schliessen')
     close_button.clicked.connect(sys.exit)
     close_button.setFixedHeight(50)
-    font = QFont()
-    font.setBold(True)
-    font.setPointSize(16)
+    # Font Definition durch die neue get_font Funktion ersetzen
+    font = get_font(16, True)
     close_button.setFont(font)
     # Der Schliessen-Button soll unten rechts platziert werden
     p_layout.addWidget(close_button, alignment=Qt.AlignBottom | Qt.AlignRight)
 
 
 # # # Generische UI Elemente
+# Neue Funktion für die Generierung von Font-Elementen
+def get_font(size, bold, family=''):
+    font = QFont()
+    font.setPointSize(size)
+    font.setBold(bold)
+    if family != '':
+        font.setFamily(family)
+
+    return font
+
+
 # Eine Funktion, um einen Trennstrich erzeugen zu können (hat noch keine Ausrichtung)
 def get_divider():
     divider = QFrame()
@@ -183,6 +203,42 @@ def choose_ticket(ticket_id):
     transaction['requested_ticket'] = ticket
     transaction['remaining_amount'] = ticket.get('price')
 
+    # Anzeige zum erwarteten Betrag aktualisieren
+    remaining_amount_output.setText(f"Restbetrag: CHF {ticket.get('price'):.2f}")
+
+
+# Neue Funktion für das Stornieren von Tickets
+def cancel_ticket_choice():
+    # Im Ticketwahl-Feld die Stornierung bestätigen
+    ticket_choice.setText('Ticket storniert')
+    ticket_choice.setAlignment(Qt.AlignCenter)
+
+    # Ticket aus der Transaktion löschen
+    del transaction['requested_ticket']
+
+    # Erwarteten Betrag zurücksetzen
+    remaining_amount_output.setText('')
+
+    # Eingeworfenes Geld zurückgeben
+    if len(transaction.get('received_coins')) > 0:
+        for received_coin in sorted(transaction.get('received_coins')):
+            change_output.insertPlainText(f'CHF {received_coin:.2f}\n')
+
+        transaction['received_coins'] = []
+
+
+# Neue Funktion um den Münzeinwurf (Button-Click auf Coin-Button) abzubilden
+def receive_coin(value):
+    # Münze den eingeworfenen Münzen hinzufügen
+    transaction['received_coins'].append(value)
+
+    # Eingeworfene Münze vom erwarteten Betrag abziehen
+    transaction['remaining_amount'] = round(transaction['remaining_amount'] - round(float(value), 2), 2)
+
+    # Abfrage ob Betrag bereits bezahlt wurde (wenn nicht, erwarteten Betrag reduzieren in der Anzeige)
+    if transaction['remaining_amount'] > 0:
+        remaining_amount_output.setText(f"Restbetrag: CHF {transaction['remaining_amount']:.2f}")
+
 
 def show_ui():
     # Zuerst wird das Fenster konfiguriert
@@ -209,6 +265,8 @@ def show_ui():
     # Die Elemente zum Ticketlayout hinzufügen
     add_ticket_options(ticket_layout)
     add_ticket_choice(ticket_layout)
+    # Neu: Label hinzufügen für den erwarteten Betrag im Ticket Layout
+    add_remaining_amount(ticket_layout)
     th_divider = get_divider()
     th_divider.setFrameShape(QFrame.HLine)
     ticket_layout.addWidget(th_divider)
@@ -256,6 +314,8 @@ cancel_button = QPushButton()
 ticket_output = QTextEdit()
 # Liste für die Buttons der Auswahlmöglichkeiten zu den Münzen
 coin_buttons = []
+# Label vorbereiten für den Restbetrag
+remaining_amount_output = QLabel()
 # Ausgabe des Rückgelds
 change_output = QTextEdit()
 
