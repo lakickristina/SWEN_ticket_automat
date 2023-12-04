@@ -64,6 +64,8 @@ def add_ticket_options(p_layout):
     cancel_button.setFont(font)
     # Funktion zum Stornieren mit dem Stornieren-Button verbinden
     cancel_button.clicked.connect(cancel_ticket_choice)
+    # Stornieren deaktivieren beim Programmstart
+    set_buttons_state([cancel_button], False)
     p_layout.addWidget(cancel_button)
 
 
@@ -79,14 +81,12 @@ def add_ticket_choice(p_layout):
 
     p_layout.addWidget(ticket_choice)
 
-
 # Element für für die Anzeige des Restbetrags hinzufügen
 def add_remaining_amount(p_layout):
     font = get_font(14, True)
     font.setFamily("Courier New")
     remaining_amount_output.setFont(font)
     p_layout.addWidget(remaining_amount_output)
-
 
 # Element für die Ticketausgabe hinzufügen
 def add_ticket_output(p_layout):
@@ -126,6 +126,8 @@ def add_coin_buttons(p_layout):
         coin_buttons.append(coin_button)
         p_layout.addWidget(coin_button)
 
+    # Coin Buttons deaktivieren beim Programmstart
+    set_buttons_state(coin_buttons, False)
     # Dieses Label wurde für eine Korrektur der Abstände im Layout hinzugefügt
     p_layout.addWidget(QLabel())
 
@@ -161,6 +163,16 @@ def add_close_button(p_layout):
 
 
 # # # Generische UI Elemente
+# Neue Funktion, um eine Liste an Buttons zu deaktivieren (verwendet für die UI Steuerung)
+def set_buttons_state(buttons, state):
+    # state ist True oder False, je nachdem die Buttons aktiviert (True) oder deaktiviert (False)
+    button: QPushButton
+    for button in buttons:
+        if state:
+            button.setEnabled(True)
+        else:
+            button.setDisabled(True)
+
 # Neue Funktion für die Generierung von Font-Elementen
 def get_font(size, bold, family=''):
     font = QFont()
@@ -170,7 +182,6 @@ def get_font(size, bold, family=''):
         font.setFamily(family)
 
     return font
-
 
 # Eine Funktion, um einen Trennstrich erzeugen zu können (hat noch keine Ausrichtung)
 def get_divider():
@@ -196,16 +207,21 @@ def choose_ticket(ticket_id):
     # Ticketwahl ausgeben
     ticket_choice.setPlainText(
         f"Ihre Ticket Auswahl:\
-		\n\r-- {ticket.get('name').upper()} --\
-		\n\rBitte werfen Sie CHF {ticket.get('price'):.2f} ein.")
+        \n\r-- {ticket.get('name').upper()} --\
+        \n\rBitte werfen Sie CHF {ticket.get('price'):.2f} ein.")
 
     # In der Transaktion das ticket hinterlegen und den erwarteten Betrag
     transaction['requested_ticket'] = ticket
+    # Bei Ticketwahl: Ticketbuttons deaktivieren, Coin-Buttons aktivieren und Stornieren-Button aktivieren
+    set_buttons_state(coin_buttons, True)
+    set_buttons_state(ticket_options, False)
+    set_buttons_state([cancel_button], True)
     transaction['remaining_amount'] = ticket.get('price')
 
     # Anzeige zum erwarteten Betrag aktualisieren
     remaining_amount_output.setText(f"Restbetrag: CHF {ticket.get('price'):.2f}")
-
+    # Ticketausgabe zurücksetzen
+    ticket_output.setText('')
 
 # Neue Funktion für das Stornieren von Tickets
 def cancel_ticket_choice():
@@ -215,6 +231,11 @@ def cancel_ticket_choice():
 
     # Ticket aus der Transaktion löschen
     del transaction['requested_ticket']
+
+    # Bei Stornierung: Coin-Buttons und Stornierungs-Button deaktivieren, Ticket-Buttons aktivieren
+    set_buttons_state(ticket_options, True)
+    set_buttons_state(coin_buttons, False)
+    set_buttons_state([cancel_button], False)
 
     # Erwarteten Betrag zurücksetzen
     remaining_amount_output.setText('')
@@ -236,8 +257,28 @@ def receive_coin(value):
     transaction['remaining_amount'] = round(transaction['remaining_amount'] - round(float(value), 2), 2)
 
     # Abfrage ob Betrag bereits bezahlt wurde (wenn nicht, erwarteten Betrag reduzieren in der Anzeige)
+    # Wenn doch (remaining_amount < 0) wurde das Ticket bezahlt
     if transaction['remaining_amount'] > 0:
         remaining_amount_output.setText(f"Restbetrag: CHF {transaction['remaining_amount']:.2f}")
+    else:
+        ticket = transaction['requested_ticket']
+        # Zeichenlänge einer Zeile ermitteln
+        count_name = len(ticket['name'])
+        count_price = len(str(ticket['price'])) + 1
+        total_length = 15 + count_name + count_price
+        # Ticketangaben in ticket_output drucken
+        ticket_output.insertPlainText(f"{'*' * total_length}\n")
+        ticket_output.insertPlainText(f"{'*' + ' ' * (total_length - 2) + '*'}\n")
+        ticket_output.insertPlainText(f"*  {ticket['name']} für CHF {ticket['price']:.2f}  *\n")
+        ticket_output.insertPlainText(f"{'*' + ' ' * (total_length - 2) + '*'}\n")
+        ticket_output.insertPlainText(f"{'*' * total_length}")
+
+        # Nach dem Ticketbezug: Stornierung-Button und Coin-Buttons deaktivieren, Ticket-Buttons aktivieren
+        set_buttons_state(coin_buttons, False)
+        set_buttons_state(ticket_options, True)
+        set_buttons_state([cancel_button], False)
+
+        remaining_amount_output.setText(f"Restbetrag: CHF 0.00")
 
 
 def show_ui():
