@@ -222,6 +222,8 @@ def choose_ticket(ticket_id):
     remaining_amount_output.setText(f"Restbetrag: CHF {ticket.get('price'):.2f}")
     # Ticketausgabe zurücksetzen
     ticket_output.setText('')
+    # Rückgeldausgabe zurücksetzen
+    change_output.setText('')
 
 # Neue Funktion für das Stornieren von Tickets
 def cancel_ticket_choice():
@@ -272,6 +274,33 @@ def receive_coin(value):
         ticket_output.insertPlainText(f"*  {ticket['name']} für CHF {ticket['price']:.2f}  *\n")
         ticket_output.insertPlainText(f"{'*' + ' ' * (total_length - 2) + '*'}\n")
         ticket_output.insertPlainText(f"{'*' * total_length}")
+
+        # Leere Liste für das Rückgeld anlegen
+        change = []
+        #Saldo zugunsten des*der Kund*in ausrechnen
+        balance = round(transaction['remaining_amount'] * -1, 2)
+        # So lange Kund*innensaldo nicht 0 beträgt, wird die grösstmöglich Münze vom Saldo abgezogen
+        while balance > 0:
+            for coin in reversed(coins):
+                coin = round(coin, 2)
+                if coin <= balance:
+                    # Saldo aktualisieren
+                    balance = round(balance - coin, 2)
+                    # Ausgewählte Münze dem Rückgeld hinzufügen
+                    change.append(coin)
+                    break
+
+        # Das Rückgeld-Textfeld zuürcksetzen
+        change_output.setText('')
+
+        # Dasa aktuelle Rückgeld ausgeben
+        for coin in change:
+            change_output.insertPlainText(f'CHF {coin:.2f}\n')
+
+        # Die Transaktionsdaten zurücksetzen (Ticket, erwarteter Betrag, erhaltenes Geld)
+        del transaction['requested_ticket']
+        transaction['remaining_amount'] = 0
+        transaction['received_coins'] = []
 
         # Nach dem Ticketbezug: Stornierung-Button und Coin-Buttons deaktivieren, Ticket-Buttons aktivieren
         set_buttons_state(coin_buttons, False)
