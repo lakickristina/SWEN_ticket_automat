@@ -75,7 +75,7 @@ def add_ticket_choice(p_layout):
     # Font Definition durch die neue get_font Funktion ersetzen
     font = get_font(16, False, 'Courier New')
     ticket_choice.setFont(font)
-    ticket_choice.setFixedSize(300, 110)
+    ticket_choice.setFixedSize(320, 110)
     ticket_choice.setPlainText('Keine Auswahl getroffen')
     ticket_choice.setAlignment(Qt.AlignCenter)
 
@@ -99,7 +99,7 @@ def add_ticket_output(p_layout):
     # Font Definition durch die neue get_font Funktion ersetzen
     font = QFont("Courier New", 16)
     ticket_output.setFont(font)
-    ticket_output.setFixedSize(300, 200)
+    ticket_output.setFixedSize(320, 200)
     ticket_output.setAlignment(Qt.AlignCenter)
     p_layout.addWidget(ticket_output)
 
@@ -146,7 +146,7 @@ def add_change_output(p_layout):
     # Font Definition durch die neue get_font Funktion ersetzen
     font = get_font(16, False, 'Courier New')
     change_output.setFont(font)
-    change_output.setFixedSize(300, 200)
+    change_output.setFixedSize(320, 200)
     p_layout.addWidget(change_output)
 
 
