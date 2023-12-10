@@ -37,3 +37,7 @@ venv/
 
 # MS Office temporary documents
 ~$*
+
+# Jetbrains .idea folder
+/.idea
+/.idea/.gitignore
