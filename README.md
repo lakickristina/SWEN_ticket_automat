@@ -1,37 +1,25 @@
 !! Change this document for your own project by removing the placeholder text, adding your own text, adding helpful sections etc. etc. !!
 
-# <Project Title>
+# Ticketautomat
 
-In a few sentences describe what your project is trying to solve.
-
-You can use [GitHub markdown
-notation](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax)
-or [GitLab markdown notation](https://docs.gitlab.com/ee/user/markdown.html) in
-case you are using one of these platforms. This will give a nicely formatted
-documentation when looking at your project online.
+In diesem Projekt geht es um einen Ticketautomaten, bei dem man eine Auswahl an verschiedenen Tickets hat. 
+Zusätzlich werden einem Münzen gegeben, mit denen man das Ticket bezahlen kann. 
+Es sollte möglich sein, Tickets zu wählen, diese zu bezahlen, nach Bedarf Rückgeld
+zu erhalten sowie, dass das Ticket ausgegeben wird.
 
 ## Get started
+Auf der linken Seite sind die Tickets auegführt und auf der rechten die Münzmöglichkeiten. Nach der Auswhal
+eines Tickets, können die Münzen angewählt werden, sodass das Ticket bezahlt werden kann. Wurde der 
+Betrag noch nicht erreicht, wird links der aktuelle Saldo angezeigt. Sobald der Betrag erreicht worden
+ist, bekommt man das Ticket und falls nötig das Rückgeld. Bevor der Betrag des Tickets erreicht worden
+ist, ist es jederzeit möglich den Vorgang über den Button "Ticket stornieren" abzubrechen und allfällig 
+bezahltes Geld wieder zurückzuerhalten. Das Ticket wird unten links und allfälliges Rückgeld wird rechts ausgegeben. 
+Um den Ticketautomaten zu beenden, muss man rechts unten auf den Button "Schliessen" klicken. 
 
-Explain what the user has to type to get started with your solution. Which one
-is the main Python file? In the simplest case, this could look something like
-this:
-
-``
-    python main.py
-``
-
-In other cases the user might first have to install some project dependencies
-first has to run something like this (a sample requirements.txt file is also
-included in the project template):
-
-``
-    pip install -r requirements.txt
-``
+Aus Zeitgründen wurde darauf verzichtet, die Möglichkeit zu geben, mehrere Tickets aufs Mal zu wählen. 
 
 ## Understanding the sources
 
-Explain any high level concepts that you are using in your software. What were
-your ideas for creating the whole software? What might not be apparent from the
-sources alone? You can also add diagrams, photos of whiteboards or flipcharts
-or even crudly drawing napkin sketches of the core concepts of your software
-when they are readable and helpful for understanding.
+Der Ticketautomat basiert auf verschiedenen Layouts, welche entweder horizontal oder vertikal aufgebaut sind. 
+Somit konnten die Buttons einerseits untereinander, andererseits aber auch nebeneinander abgebildet werden. 
+Für die graphischen Elemente wurde die Library von PyQt5 verwendet.
