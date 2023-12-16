@@ -1,5 +1,3 @@
-!! Change this document for your own project by removing the placeholder text, adding your own text, adding helpful sections etc. etc. !!
-
 # Ticketautomat
 
 In diesem Projekt geht es um einen Ticketautomaten, bei dem man eine Auswahl an verschiedenen Tickets hat. 
